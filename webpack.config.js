@@ -28,7 +28,7 @@ module.exports = (env) => {
             },
             {
               loader: 'sass-loader',
-              option: {
+              options: {
                 sourceMap: true
               }
             }
@@ -44,5 +44,5 @@ module.exports = (env) => {
       contentBase: path.join(__dirname, 'public'),
       historyApiFallback: true
     }
-  }
+  };
 };
