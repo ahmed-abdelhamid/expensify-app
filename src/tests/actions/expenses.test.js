@@ -1,6 +1,14 @@
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
-import { startAddExpense, addExpense, editExpense, removeExpense, setExpenses, startSetExpenses } from '../../actions/expenses';
+import {
+  startAddExpense,
+  addExpense,
+  editExpense,
+  startRemoveExpense,
+  removeExpense,
+  startSetExpenses,
+  setExpenses
+} from '../../actions/expenses';
 import expenses from '../fixtures/expenses';
 import database from '../../firebase/firebase';
 
@@ -14,6 +22,8 @@ beforeEach((done) => {
   database.ref('expenses').set(expensesData).then(() => done());
 });
 
+// Testing Removing Expenses
+
 test('should setup remove expense action object', () => {
   const action = removeExpense({ id: '123abc' });
   expect(action).toEqual({
@@ -21,6 +31,28 @@ test('should setup remove expense action object', () => {
     id: '123abc'
   });
 });
+
+test('should remove expenses from firebase', (done) => {
+  const store = createMockStore({});
+  const id = expenses[2].id;
+  store.dispatch(startRemoveExpense({ id })).then(() => {
+    const actions = store.getActions();
+    expect(actions[0]).toEqual({
+      type: 'REMOVE_EXPENSE',
+      id
+    });
+    return database.ref(`expesnes//${id}`).once('value');
+  }).then((snapshot) => {
+    expect(snapshot.val()).toBeFalsy();
+    done();
+  });
+});
+
+test('should not remove expenses from firebase', () => {
+
+});
+
+// Testing Editing Expenses
 
 test('should setup edit expense action object', () => {
   const action = editExpense('123abc', { note: 'New note value' });
@@ -32,6 +64,8 @@ test('should setup edit expense action object', () => {
     }
   });
 });
+
+// Testing Adding Expenses
 
 test('should setup add expense action object with provided values', () => {
   const action = addExpense(expenses[2]);
@@ -92,6 +126,8 @@ test('should add expense with defaults to database and store', (done) => {
     done();
   });
 });
+
+// Testing Setting Expenes
 
 test('should setup set expense action object with data', () => {
   const action = setExpenses(expenses);
